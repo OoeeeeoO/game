@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>モグラたたきウォーク！ - 道端オンリー版</title>
+    <title>モグラたたきウォーク！ - 完全体</title>
     <style>
         /* CSS (デザイン) */
         body {
@@ -10,7 +10,7 @@
             text-align: center;
             background: linear-gradient(to bottom, #87CEEB, #B0E0E6); /* 空のグラデーション */
             margin: 0;
-            padding: 0; /* paddingをなくし、背景が画面全体を覆うように */
+            padding: 0; 
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -21,7 +21,7 @@
         }
 
         /* ----------------------------------------------------- */
-        /* ★★★ 背景と車のスタイル (調整) ★★★ */
+        /* 背景と車のスタイル */
         /* ----------------------------------------------------- */
 
         /* 雲のスタイル */
@@ -49,9 +49,9 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 350px; /* ★修正: 道路の高さ広げて、草地部分も兼ねる */
-            background: linear-gradient(to top, #444, #666); /* 道路に少し立体感を */
-            border-top: 10px solid #333; /* 道路の縁 */
+            height: 350px; 
+            background: linear-gradient(to top, #444, #666); 
+            border-top: 10px solid #333; 
             z-index: 1; 
             box-shadow: inset 0 10px 20px rgba(0,0,0,0.3);
             display: flex;
@@ -75,39 +75,25 @@
         }
 
         /* 草地（道路の左右に配置） */
-        #road-background::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, #556b2f, #7CBB00); /* 草地のグラデーション */
-            clip-path: polygon(0 0, 100% 0, 100% 30%, 70% 30%, 50% 100%, 0% 100%); /* 道路以外の部分を草地にする */
-            z-index: 0; /* 道路より奥 */
-        }
-        /* 左右の草地の調整 */
         #road-background .grass-left,
         #road-background .grass-right {
             position: absolute;
             top: 0;
-            width: 50%; /* 画面の半分 */
+            width: 50%; 
             height: 100%;
-            background: linear-gradient(to bottom, #556b2f, #7CBB00); /* 草地のグラデーション */
-            z-index: 0;
+            background: linear-gradient(to bottom, #556b2f, #7CBB00); 
+            z-index: 0; 
         }
         #road-background .grass-left {
             left: 0;
-            /* 道路に合わせて斜めの線を作る */
             clip-path: polygon(0 0, 100% 0, 70% 100%, 0% 100%); 
         }
         #road-background .grass-right {
             right: 0;
-            /* 道路に合わせて斜めの線を作る */
             clip-path: polygon(0 0, 100% 0, 100% 100%, 30% 100%); 
         }
 
-        /* 車のスタイル (調整なし) */
+        /* 車のスタイル */
         .car {
             position: absolute;
             width: 100px;
@@ -137,14 +123,13 @@
         .car.blue { background-color: #0000FF; animation-delay: 3s; width: 120px; height: 45px; bottom: 80px; }
         .car.green { background-color: #008000; animation-delay: 7s; width: 90px; height: 35px; bottom: 50px; }
 
-
         @keyframes driveCar {
             0% { transform: translateX(calc(-100% - 100px)); } 
             100% { transform: translateX(calc(100vw + 100px)); } 
         }
 
         /* ----------------------------------------------------- */
-        /* ゲーム情報・ボタン (調整) */
+        /* ゲーム情報・ボタン */
         /* ----------------------------------------------------- */
         h1 { 
             color: #333; 
@@ -171,7 +156,6 @@
 
         #game-info {
             font-size: 1.4em;
-            margin-bottom: 25px;
             color: #555;
             background-color: #fff;
             padding: 10px 20px;
@@ -183,11 +167,9 @@
         #score, #time-left { font-weight: bold; color: #d35400; }
 
         /* ----------------------------------------------------- */
-        /* ★★★ 道端モグラ用のスタイル (大きく変更) ★★★ */
+        /* 道端モグラのスタイル */
         /* ----------------------------------------------------- */
 
-        /* 道端モグラ (画面全体が道端になるため、#roadside-containerは削除) */
-        /* もはや「コンテナ」は必要なく、モグラが直接body直下に出現する */
         .roadside-mole {
             width: 80px; 
             height: 80px; 
@@ -195,322 +177,60 @@
             border: 4px solid #8b4513; 
             border-radius: 50%;
             position: absolute;
+            /* top/leftはJSで設定 */
             
-            /* 初期位置は画面外か、地面に隠れる位置 */
-            transform: translate(-50%, 100%); /* XはJSで調整、Yは地面の下 */
+            /* 初期状態: 地面の下に隠れる */
+            transform: translate(-50%, 100%); 
             
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27), 
-                        width 0.3s ease-out, height 0.3s ease-out; /* 奥行き感を出すためのサイズ変化もアニメーション */
+                        width 0.3s ease-out, height 0.3s ease-out; 
             
             pointer-events: auto; 
-            z-index: 7; /* 車より手前 */
+            z-index: 7; 
             box-sizing: border-box; 
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
             box-shadow: 0 8px 15px rgba(0,0,0,0.4); 
-            cursor: pointer; /* クリック可能であることを明示 */
-        }
-
-        /* 道端モグラが出ている状態 */
-        .roadside-mole.visible {
-            /* JSでtop/leftを設定し、transformでY軸の飛び出しとサイズ、奥行き感を表現 */
-            /* 奥行きに応じてサイズとY軸の飛び出し量を変化させる */
-        }
-
-        /* ---------------------------------- */
-        /* モグラの顔のデザイン (既存部分 - 省略) */
-        /* ---------------------------------- */
-        .face-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start; 
-            width: 100%; 
-            height: 100%; 
-            padding-top: 15%; 
-            box-sizing: border-box;
-        }
-
-        .eyes {
-            display: flex;
-            justify-content: space-between;
-            width: 50%; 
-            position: absolute;
-            top: 25%; 
-            z-index: 3;
-        }
-
-        .eye {
-            width: 20px; 
-            height: 20px; 
-            background-color: white;
-            border: 2px solid black; 
-            border-radius: 50%;
-            position: relative;
-            box-sizing: border-box;
-        }
-        .eye::before { 
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background-color: black;
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        .eye::after { 
-            content: '';
-            position: absolute;
-            width: 5px; 
-            height: 5px; 
-            background-color: white;
-            border-radius: 50%;
-            top: 15%;
-            left: 15%;
-        }
-
-        .nose {
-            width: 16px; 
-            height: 10px; 
-            background-color: #e6a782; 
-            border-radius: 50%;
-            border: 1px solid #8b4513; 
-            position: absolute;
-            top: 50%; 
-            z-index: 3;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .nose::before { 
-            content: '';
-            position: absolute;
-            width: 4px;
-            height: 2px;
-            background-color: white;
-            border-radius: 50%;
-            top: 15%;
-        }
-        .nose::after { 
-            content: 'U';
-            font-family: Arial, sans-serif;
-            font-size: 10px;
-            color: #8b4513;
-            position: absolute;
-            bottom: -10px;
-            line-height: 0;
-        }
-
-        .cheeks {
-            position: absolute;
-            width: 25px;
-            height: 15px;
-            background-color: #ffb6c1; 
-            border-radius: 50%;
-            top: 40%; 
-            z-index: 2;
-            box-shadow: 0 0 5px rgba(255, 182, 193, 0.5);
-        }
-        .cheek.left { left: 15%; }
-        .cheek.right { right: 15%; }
-        
-        .whiskers {
-            position: absolute;
-            width: 80%;
-            height: 1px;
-            top: 55%;
-            z-index: 3;
-        }
-        .whiskers::before, .whiskers::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 1px;
-            background: #8b4513; 
-            top: 0;
-            transform-origin: 100% 50%;
-        }
-        .whiskers::before { 
-            right: 50%;
-            margin-right: 5px;
-            box-shadow: 
-                0 -6px 0 0 #8b4513, 
-                0 6px 0 0 #8b4513;
-            transform: rotate(0deg);
-        }
-        .whiskers::after { 
-            left: 50%;
-            margin-left: 5px;
-            box-shadow: 
-                0 -6px 0 0 #8b4513, 
-                0 6px 0 0 #8b4513;
-            transform: rotate(0deg);
-        }
-
-        .paws {
-            position: absolute;
-            width: 100%;
-            height: 30px; 
-            bottom: 0; 
-            z-index: 4; 
-            pointer-events: none;
-        }
-        .paw {
-            position: absolute;
-            width: 35px;
-            height: 35px;
-            background-color: #a0522d; 
-            border: 2px solid #8b4513;
-            border-radius: 50%;
-            bottom: 10px; 
-            z-index: 4;
-            box-shadow: 0 5px 5px rgba(0,0,0,0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .paw::before { 
-            content: '';
-            position: absolute;
-            width: 10px;
-            height: 5px;
-            background: radial-gradient(#663300 30%, transparent 30%);
-            background-size: 5px 5px;
-            top: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .paw.left { left: 15%; transform: rotate(-10deg); }
-        .paw.right { right: 15%; transform: rotate(10deg); }
-
-        /* ---------------------------------- */
-        /* 各モグラのカスタムスタイル (既存部分 - 省略) */
-        /* ---------------------------------- */
-        .mole:not(.gold):not(.bomb):not(.clock) { background-color: #c28b5e; border-color: #8b4513; }
-        .mole:not(.gold):not(.bomb):not(.clock) .paw { background-color: #a0522d; border-color: #8b4513; }
-        .mole:not(.gold):not(.bomb):not(.clock) .cheeks { background-color: #ffb6c1; }
-        .mole:not(.gold):not(.bomb):not(.clock) .whiskers::before, .mole:not(.gold):not(.bomb):not(.clock) .whiskers::after { background: #8b4513; box-shadow: 0 -6px 0 0 #8b4513, 0 6px 0 0 #8b4513;}
-
-        .mole.gold { background: linear-gradient(to bottom, #ffd700, #daa520); border: 4px solid #b8860b; box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
-        .mole.gold .paw { background-color: #ffd700; border-color: #b8860b; }
-        .mole.gold .cheeks { background-color: #ffcc00; }
-        .mole.gold .whiskers::before, .mole.gold .whiskers::after { background: #b8860b; box-shadow: 0 -6px 0 0 #b8860b, 0 6px 0 0 #b8860b; }
-        .mole.gold .eye { border-color: #b8860b; }
-        .mole.gold .nose { background-color: #f08080; border-color: #8b0000; }
-        .mole.gold .nose::after { color: #8b0000; }
-
-        .mole.bomb { background-color: #333; border: 4px solid #ff4500; box-shadow: 0 0 10px rgba(255, 69, 0, 0.7); }
-        .mole.bomb .paw { background-color: #000; border-color: #ff4500; }
-        .mole.bomb .cheeks { background-color: #ff0000; }
-        .mole.bomb .whiskers::before, .mole.bomb .whiskers::after { background: #ff4500; box-shadow: 0 -6px 0 0 #ff4500, 0 6px 0 0 #ff4500; }
-        .mole.bomb .eye { background-color: #ff0000; border-color: #8b0000; }
-        .mole.bomb .eye::before { background-color: #fff; }
-        .mole.bomb .eye::after { display: none; }
-        .mole.bomb .nose { background-color: #000; border-color: #666; }
-        .mole.bomb .nose::after { content: '-'; color: #ff0000; } 
-        .mole.bomb .paw::before { background: radial-gradient(#ff0000 30%, transparent 30%); }
-
-        .mole.clock { background-color: #4682b4; border: 4px solid #3cb371; box-shadow: 0 0 10px rgba(60, 179, 113, 0.7); }
-        .mole.clock .paw { background-color: #3cb371; border-color: #4682b4; }
-        .mole.clock .cheeks { background-color: #90ee90; }
-        .mole.clock .whiskers::before, .mole.clock .whiskers::after { background: #3cb371; box-shadow: 0 -6px 0 0 #3cb371, 0 6px 0 0 #3cb371; }
-        .mole.clock .eye { border-color: #008000; }
-        .mole.clock .eye::before { background-color: #006400; }
-        .mole.clock .nose { background-color: #e0ffff; border-color: #4682b4; }
-        .mole.clock .nose::after { color: #008000; }
-        
-        /* ---------------------------------- */
-        /* ゲームオーバーモーダル・スコアポップアップ (既存部分 - 省略) */
-        /* ---------------------------------- */
-        #game-over-modal {
-            display: none; 
-            position: fixed;
-            z-index: 100; 
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.7); 
-            backdrop-filter: blur(5px); 
-        }
-
-        .modal-content {
-            background-color: #fff;
-            margin: 15% auto; 
-            padding: 30px;
-            border: 5px solid #d35400;
-            width: 80%;
-            max-width: 400px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.5s;
-        }
-
-        .modal-content h2 {
-            color: #d35400;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .final-score {
-            font-size: 3.5em;
-            color: #27ae60; 
-            font-weight: bold;
-            display: block;
-            margin: 15px 0;
-            padding: 10px;
-            background-color: #ecf0f1;
-            border-radius: 8px;
-        }
-
-        .modal-content button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1.2em;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .modal-content button:hover {
-            background-color: #2980b9;
+            cursor: pointer; 
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
+        /* ---------------------------------- */
+        /* モグラの顔のデザイン (既存) */
+        /* ---------------------------------- */
+        .face-container { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; height: 100%; padding-top: 15%; box-sizing: border-box; }
+        .eyes { display: flex; justify-content: space-between; width: 50%; position: absolute; top: 25%; z-index: 3; }
+        .eye { width: 20px; height: 20px; background-color: white; border: 2px solid black; border-radius: 50%; position: relative; box-sizing: border-box; }
+        .eye::before { content: ''; position: absolute; width: 8px; height: 8px; background-color: black; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .eye::after { content: ''; position: absolute; width: 5px; height: 5px; background-color: white; border-radius: 50%; top: 15%; left: 15%; }
+        .nose { width: 16px; height: 10px; background-color: #e6a782; border-radius: 50%; border: 1px solid #8b4513; position: absolute; top: 50%; z-index: 3; display: flex; justify-content: center; align-items: center; }
+        .nose::before { content: ''; position: absolute; width: 4px; height: 2px; background-color: white; border-radius: 50%; top: 15%; }
+        .nose::after { content: 'U'; font-family: Arial, sans-serif; font-size: 10px; color: #8b4513; position: absolute; bottom: -10px; line-height: 0; }
+        .cheeks { position: absolute; width: 25px; height: 15px; background-color: #ffb6c1; border-radius: 50%; top: 40%; z-index: 2; box-shadow: 0 0 5px rgba(255, 182, 193, 0.5); }
+        .cheek.left { left: 15%; } .cheek.right { right: 15%; }
+        .whiskers { position: absolute; width: 80%; height: 1px; top: 55%; z-index: 3; }
+        .whiskers::before, .whiskers::after { content: ''; position: absolute; width: 20px; height: 1px; background: #8b4513; top: 0; transform-origin: 100% 50%; }
+        .whiskers::before { right: 50%; margin-right: 5px; box-shadow: 0 -6px 0 0 #8b4513, 0 6px 0 0 #8b4513; transform: rotate(0deg); }
+        .whiskers::after { left: 50%; margin-left: 5px; box-shadow: 0 -6px 0 0 #8b4513, 0 6px 0 0 #8b4513; transform: rotate(0deg); }
+        .paws { position: absolute; width: 100%; height: 30px; bottom: 0; z-index: 4; pointer-events: none; }
+        .paw { position: absolute; width: 35px; height: 35px; background-color: #a0522d; border: 2px solid #8b4513; border-radius: 50%; bottom: 10px; z-index: 4; box-shadow: 0 5px 5px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; }
+        .paw::before { content: ''; position: absolute; width: 10px; height: 5px; background: radial-gradient(#663300 30%, transparent 30%); background-size: 5px 5px; top: 5px; left: 50%; transform: translateX(-50%); }
+        .paw.left { left: 15%; transform: rotate(-10deg); } .paw.right { right: 15%; transform: rotate(10deg); }
+        /* モグラの色は全てノーマルモグラのスタイルを使用 */
 
-        .score-pop {
-            position: absolute;
-            top: 0; /* モグラの上からポップアップ */
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-            pointer-events: none; 
-            opacity: 0; 
-            transition: none; 
-            animation: scorePopUp 0.6s ease-out forwards; 
-            z-index: 5;
-        }
-
-        @keyframes scorePopUp {
-            0% { opacity: 1; transform: translate(-50%, 0); }
-            100% { opacity: 0; transform: translate(-50%, -100px); }
-        }
+        /* ---------------------------------- */
+        /* ゲームオーバーモーダル・スコアポップアップ (既存) */
+        /* ---------------------------------- */
+        #game-over-modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); }
+        .modal-content { background-color: #fff; margin: 15% auto; padding: 30px; border: 5px solid #d35400; width: 80%; max-width: 400px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); animation: fadeIn 0.5s; }
+        .modal-content h2 { color: #d35400; font-size: 2.5em; margin-bottom: 10px; }
+        .final-score { font-size: 3.5em; color: #27ae60; font-weight: bold; display: block; margin: 15px 0; padding: 10px; background-color: #ecf0f1; border-radius: 8px; }
+        .modal-content button { background-color: #3498db; color: white; border: none; padding: 10px 20px; font-size: 1.2em; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; }
+        .modal-content button:hover { background-color: #2980b9; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        .score-pop { position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%); font-size: 2.5em; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); pointer-events: none; opacity: 0; transition: none; animation: scorePopUp 0.6s ease-out forwards; z-index: 5; }
+        @keyframes scorePopUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -100px); } }
         
     </style>
 </head>
@@ -529,12 +249,14 @@
     <div id="controls">
         <button id="start-button">ゲームスタート</button>
     </div>
-
-    <div id="road-background">
+    
+    
+<div id="road-background">
         <div class="car"></div>
         <div class="car blue"></div>
         <div class="car green"></div>
-        <div class="grass-left"></div>
+        
+<div class="grass-left"></div>
         <div class="grass-right"></div>
     </div>
     
@@ -552,21 +274,9 @@
 
         const GAME_DURATION = 30;
         
-        // 穴モグラはなくなるため、これらの定数は不要
-        // const NORMAL_MOLE_SCORE = 1;
-        // const GOLD_MOLE_SCORE = 3;
-        // const BOMB_MOLE_SCORE = -5;
-        // const CLOCK_MOLE_SCORE = 2;
-        // const BOMB_TIME_PENALTY = 5; 
-        // const CLOCK_TIME_BONUS = 5; 
-        // const GOLD_MOLE_CHANCE = 0.10; 
-        // const BOMB_MOLE_CHANCE = 0.15; 
-        // const CLOCK_MOLE_CHANCE = 0.05; 
-        // const NORMAL_MOLE_CHANCE = 1.0 - (GOLD_MOLE_CHANCE + BOMB_MOLE_CHANCE + CLOCK_MOLE_CHANCE); 
-
-        // ★★★ 道端モグラ用の定数 (調整) ★★★
-        const ROADSIDE_MOLE_BASE_SCORE = 10; // 基本スコアを高く設定
-        const ROADSIDE_MOLE_CHANCE = 0.8; // 出現確率を非常に高くする
+        // 道端モグラ用の定数
+        const ROADSIDE_MOLE_BASE_SCORE = 10; 
+        const ROADSIDE_MOLE_CHANCE = 0.8; // 高い出現確率
         const ROADSIDE_APPEAR_DURATION = 800; // 出現時間
 
         // モグラの初期サイズと最大サイズ (奥行き感を出すため)
@@ -582,16 +292,14 @@
         const scoreDisplay = document.getElementById('score');
         const timeLeftDisplay = document.getElementById('time-left');
         const startButton = document.getElementById('start-button');
-        // const grid = document.getElementById('grid'); // gridは削除
-        // roadsideContainerも不要になるため削除
-        
         const gameOverModal = document.getElementById('game-over-modal');
         const finalScoreDisplay = document.getElementById('final-score');
 
-        // モグラのHTML要素を生成する共通関数 (変更なし)
+        // モグラのHTML要素を生成する共通関数
         function createMoleElement() {
              const mole = document.createElement('div');
                 mole.classList.add('mole');
+                // モグラの顔のデザイン (省略せず全て記述)
                 mole.innerHTML = `
                     <div class="face-container">
                         <div class="eyes">
@@ -610,15 +318,14 @@
             return mole;
         }
 
-        // ランダムな時間生成 (既存のまま)
+        // ランダムな時間生成
         function randomTime(min, max) { return Math.round(Math.random() * (max - min) + min); }
         
-        // ★★★ 道端モグラの出現ロジック (大幅変更) ★★★
+        // 道端モグラの出現ロジック (修正版)
         function peepRoadside() {
             if (!isGameRunning) return;
             
-            // 次の出現までの間隔 (より頻繁に出るように調整)
-            const nextPeepInterval = randomTime(500, 1500); // 0.5秒～1.5秒
+            const nextPeepInterval = randomTime(500, 1500); 
             
             // 確率で出現をスキップ
             if (Math.random() > ROADSIDE_MOLE_CHANCE) {
@@ -630,80 +337,79 @@
             mole.classList.remove('mole'); 
             mole.classList.add('roadside-mole'); 
             
-            // モグラのタイプをランダムに設定 (今回はシンプルにノーマルモグラのみ)
-            // 必要であれば、Gold/Bomb/Clockモグラも道端に出現させられます
-            // mole.classList.add('gold'); // 例: 常にゴールドモグラにする場合
             mole.dataset.type = 'normal';
             mole.dataset.score = ROADSIDE_MOLE_BASE_SCORE;
 
             mole.addEventListener('click', whackRoadside);
             document.body.appendChild(mole); // body直下に追加
 
-            // 画面の下半分 (道路から草地にかけて) の範囲でY座標をランダムに決定
-            const roadsideAreaTop = window.innerHeight - document.getElementById('road-background').offsetHeight;
-            const randomTop = randomTime(roadsideAreaTop + 50, window.innerHeight - MOLE_MIN_SIZE / 2); // 道路より少し上から画面下まで
+            // --- 座標計算の安定化 ---
+            const windowHeight = window.innerHeight;
+            const roadBackgroundHeight = document.getElementById('road-background').offsetHeight;
+            const roadsideAreaTop = windowHeight - roadBackgroundHeight;
+
+            // Y座標の決定: 遠く(roadsideAreaTop + 10)から手前(windowHeight - MOLE_MIN_SIZE*0.8)まで
+            const randomTop = randomTime(roadsideAreaTop + 10, windowHeight - MOLE_MIN_SIZE * 0.8); 
             
-            // 奥行き感に応じてモグラのサイズとY軸の飛び出し量を調整
-            // randomTopが小さい（画面の上の方＝遠く）ほど小さく、大きい（画面の下の方＝近く）ほど大きく
-            const scaleFactor = (randomTop - roadsideAreaTop) / (window.innerHeight - roadsideAreaTop); // 0 (遠い) ~ 1 (近い)
+            // 奥行き感の計算 (0:遠い ~ 1:近い)
+            const scaleFactor = (randomTop - roadsideAreaTop) / (windowHeight - roadsideAreaTop);
             const moleSize = MOLE_MIN_SIZE + (MOLE_MAX_SIZE - MOLE_MIN_SIZE) * scaleFactor;
-            const moleJumpHeight = -20 - (scaleFactor * 80); // 遠いモグラは少ししか飛び出さず、近いモグラは大きく飛び出す
-            const moleInitialY = window.innerHeight - randomTop + (moleSize / 2); // 画面下からの距離とモグラの高さで初期Yを設定
-
-            mole.style.width = `${moleSize}px`;
-            mole.style.height = `${moleSize}px`;
-            mole.style.zIndex = Math.round(7 + scaleFactor * 10); // 手前のモグラほどz-indexを高く
-
-            // 画面の左右いずれかの端から、または画面内のランダムな位置に出現させる
+            
+            // 飛び出し量の決定: 遠いモグラは少しだけ、近いモグラは大きく飛び出す (画面上方向がマイナス)
+            const moleJumpY = -moleSize * 0.2 - (scaleFactor * moleSize * 0.5); 
+            
+            // X座標の決定 (画面左右の端、または画面内)
             const windowWidth = window.innerWidth;
             let randomLeft;
-            const edgeChance = 0.3; // 左右の端から出現する確率
+            const edgeChance = 0.3; 
             
-            if (Math.random() < edgeChance) { // 左端から
-                randomLeft = randomTime(-moleSize / 2, -moleSize / 4);
-            } else if (Math.random() < edgeChance * 2) { // 右端から
-                randomLeft = randomTime(windowWidth - moleSize / 4, windowWidth + moleSize / 2);
-            } else { // 画面内
-                randomLeft = randomTime(0, windowWidth - moleSize);
+            if (Math.random() < edgeChance) { 
+                randomLeft = randomTime(-moleSize * 0.5, -moleSize * 0.2); // 左端から少しだけ見せる
+            } else if (Math.random() < edgeChance * 2) { 
+                randomLeft = randomTime(windowWidth - moleSize * 0.8, windowWidth - moleSize * 0.5); // 右端から少しだけ見せる
+            } else { 
+                randomLeft = randomTime(0, windowWidth - moleSize); // 画面内のどこか
             }
 
-            mole.style.left = `${randomLeft}px`;
-            mole.style.bottom = `${window.innerHeight - randomTop}px`; // bottomプロパティで位置を調整
+            // --- モグラの位置とサイズの設定 ---
+            mole.style.width = `${moleSize}px`;
+            mole.style.height = `${moleSize}px`;
+            mole.style.zIndex = Math.round(7 + scaleFactor * 10); 
 
-            // 初期状態は地面の下に隠す
-            mole.style.transform = `translateX(-50%) translateY(100%)`; 
+            // モグラの基準位置をトップとレフトで設定
+            mole.style.top = `${randomTop}px`; 
+            mole.style.left = `${randomLeft}px`;
+
+            // 初期状態 (地面の下)
+            mole.style.transform = `translateX(-50%) translateY(100%) scale(1)`; 
             
             // 出現アニメーション
-            // requestAnimationFrameを使ってDOMの更新を最適化し、アニメーションの滑らかさを向上
             requestAnimationFrame(() => {
-                mole.classList.add('visible'); // visibleクラスを付与
-                // モグラが出ている状態のtransformを設定
-                mole.style.transform = `translateX(-50%) translateY(${moleJumpHeight}%)`; 
+                // 出現後の状態 (飛び出し + 奥行きによるスケール)
+                const scaleValue = 1 + scaleFactor * 0.2; // 0%〜20%拡大
+                mole.style.transform = `translateX(-50%) translateY(${moleJumpY}px) scale(${scaleValue})`; 
             });
 
 
             // 一定時間後に消える処理 (叩かれなかった場合)
             roadsideMoleTimerId = setTimeout(() => {
-                mole.classList.remove('visible'); // 引っ込ませるアニメーション
-                mole.style.transform = `translateX(-50%) translateY(100%)`; // 再び地面の下へ
+                // 引っ込むアニメーション
+                mole.style.transform = `translateX(-50%) translateY(100%) scale(1)`; 
                 
                 // アニメーション完了後に要素を完全に削除
                 setTimeout(() => {
-                    if (mole.parentNode) { // 要素がまだ存在していれば削除
+                    if (mole.parentNode) { 
                         mole.removeEventListener('click', whackRoadside);
                         mole.remove();
                     }
                     if (isGameRunning) {
-                        peepRoadside(); // 次の道端モグラ出現をスケジュール
+                        peepRoadside(); 
                     }
-                }, 300); // CSSのtransition時間と合わせる
+                }, 300);
             }, ROADSIDE_APPEAR_DURATION); 
         }
         
-        
-        // プレイヤーの操作ロジック 
-
-        // スコアポップアップ表示関数 (既存のまま)
+        // スコアポップアップ表示関数
         function showScorePop(element, points) {
             const pop = document.createElement('div');
             pop.classList.add('score-pop');
@@ -712,7 +418,7 @@
             pop.textContent = sign + points;
             
             if (points > 0) {
-                pop.style.color = '#ffd700'; // 道端モグラは常にゴールドスコアの色
+                pop.style.color = '#ffd700'; 
                 pop.style.fontSize = '3.0em'; 
             } else {
                 pop.style.color = '#e74c3c'; 
@@ -731,10 +437,7 @@
             if (timeLeft <= 0 && isGameRunning) { endGame(); }
         }
         
-        // 穴モグラたたきロジックは削除
-        // function whack(event) { ... }
-        
-        // ★★★ 道端モグラたたきロジック (調整) ★★★
+        // 道端モグラたたきロジック
         function whackRoadside(event) {
             if (!isGameRunning) return;
             const mole = event.currentTarget;
@@ -749,17 +452,17 @@
 
                 mole.removeEventListener('click', whackRoadside);
                 
-                // 叩かれたらすぐに削除（アニメーションはスキップ）
+                // 叩かれたらすぐに削除
                 mole.remove(); 
 
-                // 次の道端モグラ出現をスケジュール (素早い連打を防ぐため)
+                // 次の道端モグラ出現をスケジュール 
                 clearTimeout(roadsideMoleTimerId);
-                roadsideMoleTimerId = setTimeout(peepRoadside, randomTime(300, 800)); // 少し早めに出現
+                roadsideMoleTimerId = setTimeout(peepRoadside, randomTime(300, 800)); 
             }
         }
 
         // -----------------------------------------------------
-        // 4. ゲームの流れ (調整)
+        // ゲームの流れ
         // -----------------------------------------------------
 
         function startGame() {
@@ -772,7 +475,7 @@
             startButton.disabled = true;
             gameOverModal.style.display = 'none'; 
             
-            clearTimeout(roadsideMoleTimerId); // 既存のタイマーをクリア
+            clearTimeout(roadsideMoleTimerId); 
             
             // 既存の道端モグラを全て削除
             document.querySelectorAll('.roadside-mole').forEach(mole => {
@@ -780,7 +483,7 @@
             });
 
             countdownTimerId = setInterval(countdown, 1000);
-            peepRoadside(); // 道端モグラの出現開始
+            peepRoadside(); 
         }
 
         function countdown() {
@@ -811,7 +514,6 @@
         // -----------------------------------------------------
         // 初期設定とイベントリスナー
         // -----------------------------------------------------
-        // 従来のcreateHoles()は不要
         startButton.addEventListener('click', startGame);
     </script>
 </body>
