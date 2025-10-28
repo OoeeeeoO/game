@@ -531,3 +531,288 @@
     </div>
 
     <div id="road-background">
+        <div class="car"></div>
+        <div class="car blue"></div>
+        <div class="car green"></div>
+        <div class="grass-left"></div>
+        <div class="grass-right"></div>
+    </div>
+    
+    <div id="game-over-modal">
+        <div class="modal-content">
+            <h2>ゲームオーバー！</h2>
+            <p>最終スコア</p>
+            <span id="final-score" class="final-score">0</span>
+            <button onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript (ゲームロジック)
+
+        const GAME_DURATION = 30;
+        
+        // 穴モグラはなくなるため、これらの定数は不要
+        // const NORMAL_MOLE_SCORE = 1;
+        // const GOLD_MOLE_SCORE = 3;
+        // const BOMB_MOLE_SCORE = -5;
+        // const CLOCK_MOLE_SCORE = 2;
+        // const BOMB_TIME_PENALTY = 5; 
+        // const CLOCK_TIME_BONUS = 5; 
+        // const GOLD_MOLE_CHANCE = 0.10; 
+        // const BOMB_MOLE_CHANCE = 0.15; 
+        // const CLOCK_MOLE_CHANCE = 0.05; 
+        // const NORMAL_MOLE_CHANCE = 1.0 - (GOLD_MOLE_CHANCE + BOMB_MOLE_CHANCE + CLOCK_MOLE_CHANCE); 
+
+        // ★★★ 道端モグラ用の定数 (調整) ★★★
+        const ROADSIDE_MOLE_BASE_SCORE = 10; // 基本スコアを高く設定
+        const ROADSIDE_MOLE_CHANCE = 0.8; // 出現確率を非常に高くする
+        const ROADSIDE_APPEAR_DURATION = 800; // 出現時間
+
+        // モグラの初期サイズと最大サイズ (奥行き感を出すため)
+        const MOLE_MIN_SIZE = 50; 
+        const MOLE_MAX_SIZE = 120;
+
+        let score = 0;
+        let timeLeft = GAME_DURATION;
+        let isGameRunning = false;
+        let countdownTimerId;
+        let roadsideMoleTimerId; 
+
+        const scoreDisplay = document.getElementById('score');
+        const timeLeftDisplay = document.getElementById('time-left');
+        const startButton = document.getElementById('start-button');
+        // const grid = document.getElementById('grid'); // gridは削除
+        // roadsideContainerも不要になるため削除
+        
+        const gameOverModal = document.getElementById('game-over-modal');
+        const finalScoreDisplay = document.getElementById('final-score');
+
+        // モグラのHTML要素を生成する共通関数 (変更なし)
+        function createMoleElement() {
+             const mole = document.createElement('div');
+                mole.classList.add('mole');
+                mole.innerHTML = `
+                    <div class="face-container">
+                        <div class="eyes">
+                            <div class="eye"></div>
+                            <div class="eye"></div>
+                        </div>
+                        <div class="whiskers"></div> <div class="nose"></div>
+                        <div class="cheeks cheek left"></div>
+                        <div class="cheeks cheek right"></div>
+                    </div>
+                    <div class="paws">
+                        <div class="paw left"></div>
+                        <div class="paw right"></div>
+                    </div>
+                `;
+            return mole;
+        }
+
+        // ランダムな時間生成 (既存のまま)
+        function randomTime(min, max) { return Math.round(Math.random() * (max - min) + min); }
+        
+        // ★★★ 道端モグラの出現ロジック (大幅変更) ★★★
+        function peepRoadside() {
+            if (!isGameRunning) return;
+            
+            // 次の出現までの間隔 (より頻繁に出るように調整)
+            const nextPeepInterval = randomTime(500, 1500); // 0.5秒～1.5秒
+            
+            // 確率で出現をスキップ
+            if (Math.random() > ROADSIDE_MOLE_CHANCE) {
+                roadsideMoleTimerId = setTimeout(peepRoadside, nextPeepInterval);
+                return;
+            }
+
+            const mole = createMoleElement();
+            mole.classList.remove('mole'); 
+            mole.classList.add('roadside-mole'); 
+            
+            // モグラのタイプをランダムに設定 (今回はシンプルにノーマルモグラのみ)
+            // 必要であれば、Gold/Bomb/Clockモグラも道端に出現させられます
+            // mole.classList.add('gold'); // 例: 常にゴールドモグラにする場合
+            mole.dataset.type = 'normal';
+            mole.dataset.score = ROADSIDE_MOLE_BASE_SCORE;
+
+            mole.addEventListener('click', whackRoadside);
+            document.body.appendChild(mole); // body直下に追加
+
+            // 画面の下半分 (道路から草地にかけて) の範囲でY座標をランダムに決定
+            const roadsideAreaTop = window.innerHeight - document.getElementById('road-background').offsetHeight;
+            const randomTop = randomTime(roadsideAreaTop + 50, window.innerHeight - MOLE_MIN_SIZE / 2); // 道路より少し上から画面下まで
+            
+            // 奥行き感に応じてモグラのサイズとY軸の飛び出し量を調整
+            // randomTopが小さい（画面の上の方＝遠く）ほど小さく、大きい（画面の下の方＝近く）ほど大きく
+            const scaleFactor = (randomTop - roadsideAreaTop) / (window.innerHeight - roadsideAreaTop); // 0 (遠い) ~ 1 (近い)
+            const moleSize = MOLE_MIN_SIZE + (MOLE_MAX_SIZE - MOLE_MIN_SIZE) * scaleFactor;
+            const moleJumpHeight = -20 - (scaleFactor * 80); // 遠いモグラは少ししか飛び出さず、近いモグラは大きく飛び出す
+            const moleInitialY = window.innerHeight - randomTop + (moleSize / 2); // 画面下からの距離とモグラの高さで初期Yを設定
+
+            mole.style.width = `${moleSize}px`;
+            mole.style.height = `${moleSize}px`;
+            mole.style.zIndex = Math.round(7 + scaleFactor * 10); // 手前のモグラほどz-indexを高く
+
+            // 画面の左右いずれかの端から、または画面内のランダムな位置に出現させる
+            const windowWidth = window.innerWidth;
+            let randomLeft;
+            const edgeChance = 0.3; // 左右の端から出現する確率
+            
+            if (Math.random() < edgeChance) { // 左端から
+                randomLeft = randomTime(-moleSize / 2, -moleSize / 4);
+            } else if (Math.random() < edgeChance * 2) { // 右端から
+                randomLeft = randomTime(windowWidth - moleSize / 4, windowWidth + moleSize / 2);
+            } else { // 画面内
+                randomLeft = randomTime(0, windowWidth - moleSize);
+            }
+
+            mole.style.left = `${randomLeft}px`;
+            mole.style.bottom = `${window.innerHeight - randomTop}px`; // bottomプロパティで位置を調整
+
+            // 初期状態は地面の下に隠す
+            mole.style.transform = `translateX(-50%) translateY(100%)`; 
+            
+            // 出現アニメーション
+            // requestAnimationFrameを使ってDOMの更新を最適化し、アニメーションの滑らかさを向上
+            requestAnimationFrame(() => {
+                mole.classList.add('visible'); // visibleクラスを付与
+                // モグラが出ている状態のtransformを設定
+                mole.style.transform = `translateX(-50%) translateY(${moleJumpHeight}%)`; 
+            });
+
+
+            // 一定時間後に消える処理 (叩かれなかった場合)
+            roadsideMoleTimerId = setTimeout(() => {
+                mole.classList.remove('visible'); // 引っ込ませるアニメーション
+                mole.style.transform = `translateX(-50%) translateY(100%)`; // 再び地面の下へ
+                
+                // アニメーション完了後に要素を完全に削除
+                setTimeout(() => {
+                    if (mole.parentNode) { // 要素がまだ存在していれば削除
+                        mole.removeEventListener('click', whackRoadside);
+                        mole.remove();
+                    }
+                    if (isGameRunning) {
+                        peepRoadside(); // 次の道端モグラ出現をスケジュール
+                    }
+                }, 300); // CSSのtransition時間と合わせる
+            }, ROADSIDE_APPEAR_DURATION); 
+        }
+        
+        
+        // プレイヤーの操作ロジック 
+
+        // スコアポップアップ表示関数 (既存のまま)
+        function showScorePop(element, points) {
+            const pop = document.createElement('div');
+            pop.classList.add('score-pop');
+            
+            let sign = points > 0 ? '+' : '';
+            pop.textContent = sign + points;
+            
+            if (points > 0) {
+                pop.style.color = '#ffd700'; // 道端モグラは常にゴールドスコアの色
+                pop.style.fontSize = '3.0em'; 
+            } else {
+                pop.style.color = '#e74c3c'; 
+            }
+            
+            element.appendChild(pop);
+            
+            setTimeout(() => {
+                pop.remove();
+            }, 600); 
+        }
+        
+        function updateTime() {
+            if (timeLeft < 0) { timeLeft = 0; }
+            timeLeftDisplay.textContent = timeLeft;
+            if (timeLeft <= 0 && isGameRunning) { endGame(); }
+        }
+        
+        // 穴モグラたたきロジックは削除
+        // function whack(event) { ... }
+        
+        // ★★★ 道端モグラたたきロジック (調整) ★★★
+        function whackRoadside(event) {
+            if (!isGameRunning) return;
+            const mole = event.currentTarget;
+            
+            if (mole.classList.contains('roadside-mole')) {
+                const points = parseInt(mole.dataset.score);
+                
+                showScorePop(mole, points); 
+
+                score += points;
+                scoreDisplay.textContent = score;
+
+                mole.removeEventListener('click', whackRoadside);
+                
+                // 叩かれたらすぐに削除（アニメーションはスキップ）
+                mole.remove(); 
+
+                // 次の道端モグラ出現をスケジュール (素早い連打を防ぐため)
+                clearTimeout(roadsideMoleTimerId);
+                roadsideMoleTimerId = setTimeout(peepRoadside, randomTime(300, 800)); // 少し早めに出現
+            }
+        }
+
+        // -----------------------------------------------------
+        // 4. ゲームの流れ (調整)
+        // -----------------------------------------------------
+
+        function startGame() {
+            if (isGameRunning) return;
+            isGameRunning = true;
+            score = 0;
+            timeLeft = GAME_DURATION;
+            scoreDisplay.textContent = score;
+            timeLeftDisplay.textContent = timeLeft;
+            startButton.disabled = true;
+            gameOverModal.style.display = 'none'; 
+            
+            clearTimeout(roadsideMoleTimerId); // 既存のタイマーをクリア
+            
+            // 既存の道端モグラを全て削除
+            document.querySelectorAll('.roadside-mole').forEach(mole => {
+                mole.remove();
+            });
+
+            countdownTimerId = setInterval(countdown, 1000);
+            peepRoadside(); // 道端モグラの出現開始
+        }
+
+        function countdown() {
+            timeLeft--;
+            updateTime();
+        }
+
+        function endGame() {
+            isGameRunning = false;
+            clearInterval(countdownTimerId);
+            clearTimeout(roadsideMoleTimerId); 
+            
+            // 画面上の道端モグラを全て削除
+            document.querySelectorAll('.roadside-mole').forEach(mole => {
+                mole.remove();
+            });
+
+            startButton.disabled = false;
+            
+            finalScoreDisplay.textContent = score;
+            gameOverModal.style.display = 'flex'; 
+        }
+        
+        function closeModal() {
+            gameOverModal.style.display = 'none';
+        }
+
+        // -----------------------------------------------------
+        // 初期設定とイベントリスナー
+        // -----------------------------------------------------
+        // 従来のcreateHoles()は不要
+        startButton.addEventListener('click', startGame);
+    </script>
+</body>
+</html>
