@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>モグラたたき - 最終スコア表示付き</title>
+    <title>モグラたたき - 最終スコア表示付き＆スコアポップアップ</title>
     <style>
-        /* CSS (デザイン) */
+        /* CSS (デザイン) - 既存のスタイル */
         body {
             font-family: 'Arial', sans-serif;
             text-align: center;
@@ -103,6 +103,10 @@
             pointer-events: auto; 
         }
 
+        /* ---------------------------------- */
+        /* モグラの顔のデザイン (省略 - 変更なし) */
+        /* ---------------------------------- */
+        
         /* ---------------------------------- */
         /* モグラの顔の共通デザイン */
         /* ---------------------------------- */
@@ -274,7 +278,7 @@
         .paw.right { right: 15%; transform: rotate(10deg); }
 
         /* ---------------------------------- */
-        /* 各モグラのカスタムスタイル */
+        /* 各モグラのカスタムスタイル (省略 - 変更なし) */
         /* ---------------------------------- */
         .mole:not(.gold):not(.bomb):not(.clock) { background-color: #c28b5e; border-color: #8b4513; }
         .mole:not(.gold):not(.bomb):not(.clock) .paw { background-color: #a0522d; border-color: #8b4513; }
@@ -310,7 +314,7 @@
         .mole.clock .nose::after { color: #008000; }
         
         /* ---------------------------------- */
-        /* ゲームオーバーモーダル */
+        /* ゲームオーバーモーダルのCSS */
         /* ---------------------------------- */
         #game-over-modal {
             display: none; 
@@ -323,13 +327,11 @@
             overflow: auto;
             background-color: rgba(0, 0, 0, 0.7); 
             backdrop-filter: blur(5px); 
-            justify-content: center; /* 追加: 垂直・水平中央寄せ */
-            align-items: center;     /* 追加: 垂直・水平中央寄せ */
         }
 
         .modal-content {
             background-color: #fff;
-            margin: auto; /* autoに変更 */
+            margin: 15% auto; 
             padding: 30px;
             border: 5px solid #d35400;
             width: 80%;
@@ -376,6 +378,37 @@
             from { opacity: 0; transform: scale(0.8); }
             to { opacity: 1; transform: scale(1); }
         }
+
+        /* ---------------------------------- */
+        /* ★★★ スコアポップアップの新しいCSS ★★★ */
+        /* ---------------------------------- */
+        .score-pop {
+            position: absolute;
+            top: 50%; /* 穴の上部からスタート */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            pointer-events: none; /* クリックイベントを通過させる */
+            opacity: 0; /* 初期状態は透明 */
+            transition: none; /* 最初の表示ではトランジションを無効化 */
+            animation: scorePopUp 0.6s ease-out forwards; /* アニメーションを適用 */
+            z-index: 5;
+        }
+
+        /* スコアポップアップのアニメーション定義 */
+        @keyframes scorePopUp {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, 0); /* 下から上へ */
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -100px); /* 上に移動して消える */
+            }
+        }
     </style>
 </head>
 <body>
@@ -402,20 +435,19 @@
     </div>
 
     <script>
+        // JavaScript (ゲームロジック)
+
         const HOLE_COUNT = 9;
         const GAME_DURATION = 30;
         
-        // スコア設定
         const NORMAL_MOLE_SCORE = 1;
         const GOLD_MOLE_SCORE = 3;
         const BOMB_MOLE_SCORE = -5;
-        const CLOCK_MOLE_SCORE = 2; // 時間ボーナスモグラにもスコアを設定
+        const CLOCK_MOLE_SCORE = 2;
 
-        // 時間設定
         const BOMB_TIME_PENALTY = 5; 
         const CLOCK_TIME_BONUS = 5; 
 
-        // 出現確率設定 (合計が1.0になるように調整)
         const GOLD_MOLE_CHANCE = 0.10; 
         const BOMB_MOLE_CHANCE = 0.15; 
         const CLOCK_MOLE_CHANCE = 0.05; 
@@ -464,7 +496,6 @@
                     </div>
                 `;
 
-                // クリックイベントリスナーを設定
                 hole.addEventListener('click', whack);
 
                 hole.appendChild(mole);
@@ -472,11 +503,8 @@
             }
         }
 
-        // -----------------------------------------------------
         // 2. モグラの出現ロジック
-        // -----------------------------------------------------
         function randomTime(min, max) { return Math.round(Math.random() * (max - min) + min); }
-        
         function randomHole() {
             const holes = document.querySelectorAll('.hole');
             const idx = Math.floor(Math.random() * holes.length);
@@ -486,7 +514,6 @@
             lastHole = hole;
             return hole;
         }
-
         function randomMoleType() {
             const r = Math.random();
             if (r < CLOCK_MOLE_CHANCE) { return 'clock'; } 
@@ -494,15 +521,13 @@
             else if (r < CLOCK_MOLE_CHANCE + BOMB_MOLE_CHANCE + GOLD_MOLE_CHANCE) { return 'gold'; } 
             else { return 'normal'; }
         }
-
         function peep() {
             if (!isGameRunning) return;
-            const time = randomTime(500, 1500); // 出現時間をランダムに
+            const time = randomTime(500, 1500);
             const hole = randomHole();
             const mole = hole.querySelector('.mole');
             const moleType = randomMoleType();
             
-            // 古いクラスを削除し、タイプに応じたスコアを設定
             mole.classList.remove('gold', 'bomb', 'clock'); 
             let scoreValue;
             switch (moleType) {
@@ -512,32 +537,54 @@
                 default: scoreValue = NORMAL_MOLE_SCORE; break;
             }
 
-            // モグラのタイプとスコアをデータ属性として保持
             mole.dataset.type = moleType; 
             mole.dataset.score = scoreValue;
 
-            // モグラを出す
             hole.classList.add('up');
 
-            // 一定時間後にモグラを引っ込める
             setTimeout(() => {
                 hole.classList.remove('up');
                 mole.classList.remove('gold', 'bomb', 'clock'); 
                 delete mole.dataset.type; 
                 delete mole.dataset.score;
-                if (isGameRunning) { peep(); } // ゲームが動いていれば次のモグラを出す
+                if (isGameRunning) { peep(); }
             }, time);
         }
 
         // -----------------------------------------------------
-        // 3. プレイヤーの操作ロジック
+        // 3. プレイヤーの操作ロジック (スコアポップアップ追加)
         // -----------------------------------------------------
+
+        // ★★★ スコアポップアップ表示関数 ★★★
+        function showScorePop(hole, points) {
+            const pop = document.createElement('div');
+            pop.classList.add('score-pop');
+            
+            // スコアに応じて色とテキストを決定
+            let sign = points > 0 ? '+' : '';
+            pop.textContent = sign + points;
+            
+            if (points > 0) {
+                pop.style.color = points >= GOLD_MOLE_SCORE ? '#ffd700' : '#27ae60'; // 金モグラは黄色、他は緑
+            } else {
+                pop.style.color = '#e74c3c'; // ボムは赤
+            }
+            
+            // スコアポップアップを穴に追加
+            hole.appendChild(pop);
+            
+            // アニメーションが完了したら要素を削除
+            setTimeout(() => {
+                pop.remove();
+            }, 600); // CSSのアニメーション時間(0.6s)と合わせる
+        }
+        
         function updateTime() {
             if (timeLeft < 0) { timeLeft = 0; }
             timeLeftDisplay.textContent = timeLeft;
             if (timeLeft <= 0 && isGameRunning) { endGame(); }
         }
-
+        
         function whack(event) {
             if (!isGameRunning) return;
             const hole = event.currentTarget;
@@ -547,19 +594,19 @@
                 const points = parseInt(mole.dataset.score);
                 const type = mole.dataset.type;
                 
-                // スコア加算/減算
+                showScorePop(hole, points); // ★★★ スコアポップアップを呼ぶ ★★★
+
                 score += points;
                 scoreDisplay.textContent = score;
 
-                // 特殊効果の処理
                 if (type === 'clock') { 
-                    timeLeft += CLOCK_TIME_BONUS; // 時間ボーナス
+                    timeLeft += CLOCK_TIME_BONUS; 
                 } else if (type === 'bomb') { 
-                    timeLeft -= BOMB_TIME_PENALTY; // 時間ペナルティ
+                    timeLeft -= BOMB_TIME_PENALTY;
                 }
-                updateTime(); // 時間を更新
 
-                // 叩かれたモグラを引っ込めてリセット
+                updateTime(); 
+                
                 hole.classList.remove('up');
                 mole.classList.remove('gold', 'bomb', 'clock'); 
                 delete mole.dataset.type; 
@@ -579,13 +626,9 @@
             scoreDisplay.textContent = score;
             timeLeftDisplay.textContent = timeLeft;
             startButton.disabled = true;
-            gameOverModal.style.display = 'none'; // モーダルを閉じる
-            
-            // カウントダウンタイマーを開始
+            gameOverModal.style.display = 'none'; 
             countdownTimerId = setInterval(countdown, 1000);
-            
-            // 最初のモグラを出す
-            peep(); 
+            peep();
         }
 
         function countdown() {
@@ -597,7 +640,6 @@
             isGameRunning = false;
             clearInterval(countdownTimerId);
 
-            // 出ているモグラをすべて引っ込める
             document.querySelectorAll('.hole.up').forEach(hole => {
                 hole.classList.remove('up');
                 const mole = hole.querySelector('.mole');
@@ -609,12 +651,10 @@
 
             startButton.disabled = false;
             
-            // 最終スコアをモーダルに表示してポップアップ
             finalScoreDisplay.textContent = score;
-            gameOverModal.style.display = 'flex'; // モーダルを表示
+            gameOverModal.style.display = 'flex'; 
         }
         
-        // モーダルを閉じる関数
         function closeModal() {
             gameOverModal.style.display = 'none';
         }
