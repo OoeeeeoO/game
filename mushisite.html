@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>モグラたたきウォーク！ - 完全体</title>
+    <title>モグラたたきドライブ！ - 車モグラ版</title>
     <style>
         /* CSS (デザイン) */
         body {
@@ -21,10 +21,10 @@
         }
 
         /* ----------------------------------------------------- */
-        /* 背景と車のスタイル */
+        /* 背景と車のスタイル (大幅変更あり) */
         /* ----------------------------------------------------- */
 
-        /* 雲のスタイル */
+        /* 雲のスタイル (省略) */
         .cloud {
             position: absolute;
             background: #fff;
@@ -74,39 +74,33 @@
             z-index: 2;
         }
 
-        /* 草地（道路の左右に配置） */
-        #road-background .grass-left,
-        #road-background .grass-right {
+        /* 草地（省略 - road-backgroundの::afterで表現される） */
+
+        /* 車のスタイル (変更点: window要素とコンテナ構造を追加) */
+        .car-container {
+            /* 車アニメーションを制御するコンテナ */
             position: absolute;
-            top: 0;
-            width: 50%; 
-            height: 100%;
-            background: linear-gradient(to bottom, #556b2f, #7CBB00); 
-            z-index: 0; 
-        }
-        #road-background .grass-left {
-            left: 0;
-            clip-path: polygon(0 0, 100% 0, 70% 100%, 0% 100%); 
-        }
-        #road-background .grass-right {
-            right: 0;
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 30% 100%); 
+            bottom: 60px; /* 道路上を走る位置 */
+            z-index: 3;
+            transform: translateX(-150vw); /* 初期位置は画面左外 */
+            animation: driveCar 10s linear infinite; 
+            
+            /* モグラが飛び出せるように、コンテナ自体にz-indexとoverflowを設定 */
+            overflow: visible; 
         }
 
-        /* 車のスタイル */
         .car {
-            position: absolute;
+            /* 車体本体 */
+            position: relative;
             width: 100px;
             height: 40px;
             background-color: #FF0000; 
             border-radius: 10px 10px 5px 5px;
-            bottom: 60px; 
-            z-index: 3;
             box-shadow: 0 5px 10px rgba(0,0,0,0.3);
-            animation: driveCar 10s linear infinite; 
-            transform: translateX(-150vw); 
         }
+        
         .car::before, .car::after {
+            /* タイヤ (省略) */
             content: '';
             position: absolute;
             width: 20px;
@@ -120,8 +114,30 @@
         .car::before { left: 10px; } 
         .car::after { right: 10px; } 
 
-        .car.blue { background-color: #0000FF; animation-delay: 3s; width: 120px; height: 45px; bottom: 80px; }
-        .car.green { background-color: #008000; animation-delay: 7s; width: 90px; height: 35px; bottom: 50px; }
+        /* 窓 (モグラの穴になる場所) */
+        .car-window {
+            position: absolute;
+            top: -15px; /* 車体より少し上 */
+            left: 30px; 
+            width: 30px;
+            height: 20px;
+            background-color: #a0522d; /* モグラの穴の色と同じ */
+            border-radius: 5px 5px 0 0;
+            overflow: hidden; /* モグラを隠す */
+            cursor: pointer;
+            z-index: 5;
+            border: 3px solid #ccc;
+        }
+
+        .car.blue + .car-window { left: 40px; width: 40px; }
+        .car.green + .car-window { left: 25px; width: 25px; }
+
+        .car.blue { background-color: #0000FF; }
+        .car.green { background-color: #008000; }
+
+        .car-container.blue { animation-delay: 3s; width: 120px; height: 45px; bottom: 80px; }
+        .car-container.green { animation-delay: 7s; width: 90px; height: 35px; bottom: 50px; }
+
 
         @keyframes driveCar {
             0% { transform: translateX(calc(-100% - 100px)); } 
@@ -129,109 +145,103 @@
         }
 
         /* ----------------------------------------------------- */
-        /* ゲーム情報・ボタン */
+        /* モグラのスタイル (調整: 窓から顔を出すように) */
         /* ----------------------------------------------------- */
-        h1 { 
-            color: #333; 
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            z-index: 10; 
+        
+        /* 窓の中のモグラコンテナ */
+        .mole-in-car {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            bottom: -100%; /* 初期位置: 窓の下に隠れる */
+            transition: bottom 0.2s ease-out;
+            pointer-events: none; /* 窓自体がクリック対象なので、モグラは透過 */
+            box-sizing: border-box;
+            z-index: 1; /* 窓の中で最前面 */
+            overflow: visible; /* 顔を出すため */
+        }
+
+        /* モグラが出ている状態 */
+        .car-window.up .mole-in-car {
+            bottom: -10%; /* 窓から少し顔を出す */
+            pointer-events: auto; /* 叩けるようにする */
         }
         
-        #controls { margin-bottom: 20px; z-index: 10; }
-        #start-button {
-            padding: 10px 25px;
-            font-size: 1.5em;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-        #start-button:hover { background-color: #45a049; transform: translateY(-2px); }
-        #start-button:disabled { background-color: #cccccc; cursor: not-allowed; transform: translateY(0); box-shadow: none; }
-
-        #game-info {
-            font-size: 1.4em;
-            color: #555;
-            background-color: #fff;
-            padding: 10px 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 10;
-        }
-        #game-info p { margin: 0; }
-        #score, #time-left { font-weight: bold; color: #d35400; }
-
-        /* ----------------------------------------------------- */
-        /* 道端モグラのスタイル */
-        /* ----------------------------------------------------- */
-
-        .roadside-mole {
-            width: 80px; 
-            height: 80px; 
+        /* 窓の中のモグラの見た目 */
+        .mole-in-car > div:first-child { 
+            width: 100%; 
+            height: 100%; 
             background-color: #c28b5e; 
             border: 4px solid #8b4513; 
             border-radius: 50%;
-            position: absolute;
-            /* top/leftはJSで設定 */
-            
-            /* 初期状態: 地面の下に隠れる */
-            transform: translate(-50%, 100%); 
-            
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27), 
-                        width 0.3s ease-out, height 0.3s ease-out; 
-            
-            pointer-events: auto; 
-            z-index: 7; 
-            box-sizing: border-box; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.4); 
-            cursor: pointer; 
+            box-sizing: border-box;
         }
-        
-        /* ---------------------------------- */
-        /* モグラの顔のデザイン (既存) */
-        /* ---------------------------------- */
-        .face-container { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; height: 100%; padding-top: 15%; box-sizing: border-box; }
-        .eyes { display: flex; justify-content: space-between; width: 50%; position: absolute; top: 25%; z-index: 3; }
-        .eye { width: 20px; height: 20px; background-color: white; border: 2px solid black; border-radius: 50%; position: relative; box-sizing: border-box; }
-        .eye::before { content: ''; position: absolute; width: 8px; height: 8px; background-color: black; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .eye::after { content: ''; position: absolute; width: 5px; height: 5px; background-color: white; border-radius: 50%; top: 15%; left: 15%; }
-        .nose { width: 16px; height: 10px; background-color: #e6a782; border-radius: 50%; border: 1px solid #8b4513; position: absolute; top: 50%; z-index: 3; display: flex; justify-content: center; align-items: center; }
-        .nose::before { content: ''; position: absolute; width: 4px; height: 2px; background-color: white; border-radius: 50%; top: 15%; }
-        .nose::after { content: 'U'; font-family: Arial, sans-serif; font-size: 10px; color: #8b4513; position: absolute; bottom: -10px; line-height: 0; }
-        .cheeks { position: absolute; width: 25px; height: 15px; background-color: #ffb6c1; border-radius: 50%; top: 40%; z-index: 2; box-shadow: 0 0 5px rgba(255, 182, 193, 0.5); }
-        .cheek.left { left: 15%; } .cheek.right { right: 15%; }
-        .whiskers { position: absolute; width: 80%; height: 1px; top: 55%; z-index: 3; }
-        .whiskers::before, .whiskers::after { content: ''; position: absolute; width: 20px; height: 1px; background: #8b4513; top: 0; transform-origin: 100% 50%; }
-        .whiskers::before { right: 50%; margin-right: 5px; box-shadow: 0 -6px 0 0 #8b4513, 0 6px 0 0 #8b4513; transform: rotate(0deg); }
-        .whiskers::after { left: 50%; margin-left: 5px; box-shadow: 0 -6px 0 0 #8b4513, 0 6px 0 0 #8b4513; transform: rotate(0deg); }
-        .paws { position: absolute; width: 100%; height: 30px; bottom: 0; z-index: 4; pointer-events: none; }
-        .paw { position: absolute; width: 35px; height: 35px; background-color: #a0522d; border: 2px solid #8b4513; border-radius: 50%; bottom: 10px; z-index: 4; box-shadow: 0 5px 5px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; }
-        .paw::before { content: ''; position: absolute; width: 10px; height: 5px; background: radial-gradient(#663300 30%, transparent 30%); background-size: 5px 5px; top: 5px; left: 50%; transform: translateX(-50%); }
-        .paw.left { left: 15%; transform: rotate(-10deg); } .paw.right { right: 15%; transform: rotate(10deg); }
-        /* モグラの色は全てノーマルモグラのスタイルを使用 */
+        /* 窓モグラの顔パーツはCSSでサイズ調整 */
+        .car-window .face-container { padding-top: 5%; }
+        .car-window .eyes { top: 10%; }
+        .car-window .nose { top: 30%; }
+        .car-window .cheeks { top: 25%; }
+        .car-window .whiskers { top: 35%; }
+        /* 窓モグラは手足を隠す */
+        .car-window .paws { display: none; }
+
 
         /* ---------------------------------- */
-        /* ゲームオーバーモーダル・スコアポップアップ (既存) */
+        /* スコアポップアップ (モグラの位置に調整) */
         /* ---------------------------------- */
-        #game-over-modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); }
-        .modal-content { background-color: #fff; margin: 15% auto; padding: 30px; border: 5px solid #d35400; width: 80%; max-width: 400px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); animation: fadeIn 0.5s; }
-        .modal-content h2 { color: #d35400; font-size: 2.5em; margin-bottom: 10px; }
-        .final-score { font-size: 3.5em; color: #27ae60; font-weight: bold; display: block; margin: 15px 0; padding: 10px; background-color: #ecf0f1; border-radius: 8px; }
-        .modal-content button { background-color: #3498db; color: white; border: none; padding: 10px 20px; font-size: 1.2em; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; }
-        .modal-content button:hover { background-color: #2980b9; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-        .score-pop { position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%); font-size: 2.5em; font-weight: bold; color: #fff; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); pointer-events: none; opacity: 0; transition: none; animation: scorePopUp 0.6s ease-out forwards; z-index: 5; }
-        @keyframes scorePopUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -100px); } }
-        
+        /* スコアポップアップは親要素(.car-window)の中心に出る */
+        .car-window .score-pop {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -100%);
+            z-index: 100;
+            animation: scorePopUp 0.6s ease-out forwards; 
+        }
+
+        @keyframes scorePopUp {
+            0% { opacity: 1; transform: translate(-50%, -100%); }
+            100% { opacity: 0; transform: translate(-50%, -200%); }
+        }
+
+        /* ---------------------------------- */
+        /* ゲームオーバーモーダル (省略) */
+        /* ---------------------------------- */
+        #game-over-modal {
+            display: none; 
+            position: fixed;
+            z-index: 100; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7); 
+            backdrop-filter: blur(5px); 
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto; 
+            padding: 30px;
+            border: 5px solid #d35400;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.5s;
+        }
+
+        /* ---------------------------------- */
+        /* モグラのカラーリング (再利用) */
+        /* ---------------------------------- */
+        /* 窓モグラ本体のクラス名が `.mole-in-car > div:first-child` になる点に注意 */
+
+        .mole-in-car .mole-face.gold { background: linear-gradient(to bottom, #ffd700, #daa520); border: 4px solid #b8860b; box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+        .mole-in-car .mole-face.bomb { background-color: #333; border: 4px solid #ff4500; box-shadow: 0 0 10px rgba(255, 69, 0, 0.7); }
+        .mole-in-car .mole-face.clock { background-color: #4682b4; border: 4px solid #3cb371; box-shadow: 0 0 10px rgba(60, 179, 113, 0.7); }
+
     </style>
 </head>
 <body>
@@ -240,7 +250,7 @@
     <div class="cloud blue"></div>
     <div class="cloud green"></div>
 
-    <h1>モグラたたきウォーク！ </h1>
+    <h1>モグラたたきドライブ！ </h1>
 
     <div id="game-info">
         <p>スコア: <span id="score">0</span> | 時間: <span id="time-left">30</span>秒</p>
@@ -252,12 +262,20 @@
     
     
 <div id="road-background">
-        <div class="car"></div>
-        <div class="car blue"></div>
-        <div class="car green"></div>
+        <div class="car-container" data-type="red">
+            <div class="car"></div>
+            <div class="car-window" data-type="window"></div>
+        </div>
         
-<div class="grass-left"></div>
-        <div class="grass-right"></div>
+        <div class="car-container blue" data-type="blue">
+            <div class="car blue"></div>
+            <div class="car-window" data-type="window"></div>
+        </div>
+        
+        <div class="car-container green" data-type="green">
+            <div class="car green"></div>
+            <div class="car-window" data-type="window"></div>
+        </div>
     </div>
     
     <div id="game-over-modal">
@@ -274,141 +292,127 @@
 
         const GAME_DURATION = 30;
         
-        // 道端モグラ用の定数
-        const ROADSIDE_MOLE_BASE_SCORE = 10; 
-        const ROADSIDE_MOLE_CHANCE = 0.8; // 高い出現確率
-        const ROADSIDE_APPEAR_DURATION = 800; // 出現時間
+        // モグラのタイプとスコアを再定義
+        const NORMAL_MOLE_SCORE = 5;
+        const GOLD_MOLE_SCORE = 15;
+        const BOMB_MOLE_SCORE = -10;
+        const CLOCK_MOLE_SCORE = 10;
 
-        // モグラの初期サイズと最大サイズ (奥行き感を出すため)
-        const MOLE_MIN_SIZE = 50; 
-        const MOLE_MAX_SIZE = 120;
+        const BOMB_TIME_PENALTY = 5; 
+        const CLOCK_TIME_BONUS = 5; 
+
+        const GOLD_MOLE_CHANCE = 0.15; 
+        const BOMB_MOLE_CHANCE = 0.10; 
+        const CLOCK_MOLE_CHANCE = 0.05; 
+        const NORMAL_MOLE_CHANCE = 1.0 - (GOLD_MOLE_CHANCE + BOMB_MOLE_CHANCE + CLOCK_MOLE_CHANCE);
+
+        const PEEP_DURATION = 800; // モグラが出ている時間 (ms)
 
         let score = 0;
         let timeLeft = GAME_DURATION;
         let isGameRunning = false;
         let countdownTimerId;
-        let roadsideMoleTimerId; 
+        
+        // 各車にモグラの出現/消滅を管理するタイマーIDを保持
+        const carTimers = {}; 
 
         const scoreDisplay = document.getElementById('score');
         const timeLeftDisplay = document.getElementById('time-left');
         const startButton = document.getElementById('start-button');
+        const carContainers = document.querySelectorAll('.car-container');
+        
         const gameOverModal = document.getElementById('game-over-modal');
         const finalScoreDisplay = document.getElementById('final-score');
 
-        // モグラのHTML要素を生成する共通関数
-        function createMoleElement() {
-             const mole = document.createElement('div');
-                mole.classList.add('mole');
-                // モグラの顔のデザイン (省略せず全て記述)
-                mole.innerHTML = `
-                    <div class="face-container">
-                        <div class="eyes">
-                            <div class="eye"></div>
-                            <div class="eye"></div>
-                        </div>
-                        <div class="whiskers"></div> <div class="nose"></div>
-                        <div class="cheeks cheek left"></div>
-                        <div class="cheeks cheek right"></div>
+        // モグラのHTML要素を生成する共通関数 (車窓用に合わせて調整)
+        function createMoleElement(moleType) {
+            const mole = document.createElement('div');
+            mole.classList.add('mole-in-car'); // 窓モグラ用のクラス
+
+            // モグラ本体の要素
+            const faceDiv = document.createElement('div');
+            faceDiv.classList.add('mole-face', moleType); // モグラの色/タイプクラスを付与
+            
+            // モグラの顔のデザイン (簡略化して faceDiv に組み込む)
+            faceDiv.innerHTML = `
+                <div class="face-container">
+                    <div class="eyes">
+                        <div class="eye"></div>
+                        <div class="eye"></div>
                     </div>
-                    <div class="paws">
-                        <div class="paw left"></div>
-                        <div class="paw right"></div>
-                    </div>
-                `;
+                    <div class="whiskers"></div> <div class="nose"></div>
+                    <div class="cheeks cheek left"></div>
+                    <div class="cheeks cheek right"></div>
+                </div>
+                <div class="paws" style="display: none;"></div>
+            `;
+            mole.appendChild(faceDiv);
             return mole;
         }
 
-        // ランダムな時間生成
+        // ランダムな時間生成 (既存)
         function randomTime(min, max) { return Math.round(Math.random() * (max - min) + min); }
         
-        // 道端モグラの出現ロジック (修正版)
-        function peepRoadside() {
-            if (!isGameRunning) return;
-            
-            const nextPeepInterval = randomTime(500, 1500); 
-            
-            // 確率で出現をスキップ
-            if (Math.random() > ROADSIDE_MOLE_CHANCE) {
-                roadsideMoleTimerId = setTimeout(peepRoadside, nextPeepInterval);
-                return;
-            }
-
-            const mole = createMoleElement();
-            mole.classList.remove('mole'); 
-            mole.classList.add('roadside-mole'); 
-            
-            mole.dataset.type = 'normal';
-            mole.dataset.score = ROADSIDE_MOLE_BASE_SCORE;
-
-            mole.addEventListener('click', whackRoadside);
-            document.body.appendChild(mole); // body直下に追加
-
-            // --- 座標計算の安定化 ---
-            const windowHeight = window.innerHeight;
-            const roadBackgroundHeight = document.getElementById('road-background').offsetHeight;
-            const roadsideAreaTop = windowHeight - roadBackgroundHeight;
-
-            // Y座標の決定: 遠く(roadsideAreaTop + 10)から手前(windowHeight - MOLE_MIN_SIZE*0.8)まで
-            const randomTop = randomTime(roadsideAreaTop + 10, windowHeight - MOLE_MIN_SIZE * 0.8); 
-            
-            // 奥行き感の計算 (0:遠い ~ 1:近い)
-            const scaleFactor = (randomTop - roadsideAreaTop) / (windowHeight - roadsideAreaTop);
-            const moleSize = MOLE_MIN_SIZE + (MOLE_MAX_SIZE - MOLE_MIN_SIZE) * scaleFactor;
-            
-            // 飛び出し量の決定: 遠いモグラは少しだけ、近いモグラは大きく飛び出す (画面上方向がマイナス)
-            const moleJumpY = -moleSize * 0.2 - (scaleFactor * moleSize * 0.5); 
-            
-            // X座標の決定 (画面左右の端、または画面内)
-            const windowWidth = window.innerWidth;
-            let randomLeft;
-            const edgeChance = 0.3; 
-            
-            if (Math.random() < edgeChance) { 
-                randomLeft = randomTime(-moleSize * 0.5, -moleSize * 0.2); // 左端から少しだけ見せる
-            } else if (Math.random() < edgeChance * 2) { 
-                randomLeft = randomTime(windowWidth - moleSize * 0.8, windowWidth - moleSize * 0.5); // 右端から少しだけ見せる
-            } else { 
-                randomLeft = randomTime(0, windowWidth - moleSize); // 画面内のどこか
-            }
-
-            // --- モグラの位置とサイズの設定 ---
-            mole.style.width = `${moleSize}px`;
-            mole.style.height = `${moleSize}px`;
-            mole.style.zIndex = Math.round(7 + scaleFactor * 10); 
-
-            // モグラの基準位置をトップとレフトで設定
-            mole.style.top = `${randomTop}px`; 
-            mole.style.left = `${randomLeft}px`;
-
-            // 初期状態 (地面の下)
-            mole.style.transform = `translateX(-50%) translateY(100%) scale(1)`; 
-            
-            // 出現アニメーション
-            requestAnimationFrame(() => {
-                // 出現後の状態 (飛び出し + 奥行きによるスケール)
-                const scaleValue = 1 + scaleFactor * 0.2; // 0%〜20%拡大
-                mole.style.transform = `translateX(-50%) translateY(${moleJumpY}px) scale(${scaleValue})`; 
-            });
-
-
-            // 一定時間後に消える処理 (叩かれなかった場合)
-            roadsideMoleTimerId = setTimeout(() => {
-                // 引っ込むアニメーション
-                mole.style.transform = `translateX(-50%) translateY(100%) scale(1)`; 
-                
-                // アニメーション完了後に要素を完全に削除
-                setTimeout(() => {
-                    if (mole.parentNode) { 
-                        mole.removeEventListener('click', whackRoadside);
-                        mole.remove();
-                    }
-                    if (isGameRunning) {
-                        peepRoadside(); 
-                    }
-                }, 300);
-            }, ROADSIDE_APPEAR_DURATION); 
+        // ランダムなモグラの種類を決定 (既存ロジックを再利用)
+        function randomMoleType() {
+            const r = Math.random();
+            if (r < CLOCK_MOLE_CHANCE) { return 'clock'; } 
+            else if (r < CLOCK_MOLE_CHANCE + BOMB_MOLE_CHANCE) { return 'bomb'; } 
+            else if (r < CLOCK_MOLE_CHANCE + BOMB_MOLE_CHANCE + GOLD_MOLE_CHANCE) { return 'gold'; } 
+            else { return 'normal'; }
         }
-        
+
+        // 窓からモグラが出現するロジック
+        function peepCarMole(windowElement) {
+            if (!isGameRunning) return;
+
+            const carType = windowElement.parentNode.dataset.type;
+            const windowKey = carType; // タイマー管理用のキー
+
+            // 1. モグラのタイプを決定し、スコアを設定
+            const moleType = randomMoleType();
+            let scoreValue;
+            switch (moleType) {
+                case 'gold': scoreValue = GOLD_MOLE_SCORE; break;
+                case 'bomb': scoreValue = BOMB_MOLE_SCORE; break;
+                case 'clock': scoreValue = CLOCK_MOLE_SCORE; break;
+                default: scoreValue = NORMAL_MOLE_SCORE; break;
+            }
+            
+            // 2. モグラの要素を生成し、データ属性を設定
+            const mole = createMoleElement(moleType);
+            mole.dataset.type = moleType;
+            mole.dataset.score = scoreValue;
+            
+            // 3. 窓にモグラをセット
+            windowElement.innerHTML = ''; // 以前のモグラをクリア
+            windowElement.appendChild(mole);
+            windowElement.classList.add('up'); // 窓から顔を出す
+
+            // 4. クリックイベントリスナーを追加
+            windowElement.onclick = whack;
+
+            // 5. 一定時間後に消えるタイマーを設定
+            const hideTime = randomTime(PEEP_DURATION, PEEP_DURATION * 2);
+            carTimers[windowKey] = setTimeout(() => {
+                // 叩かれなかった場合
+                windowElement.classList.remove('up');
+                
+                // アニメーション後に要素を削除し、次の出現をスケジュール
+                setTimeout(() => {
+                    windowElement.innerHTML = '';
+                    windowElement.onclick = null;
+                    if (isGameRunning) {
+                        carTimers[windowKey] = setTimeout(() => peepCarMole(windowElement), randomTime(1000, 3000));
+                    }
+                }, 200); // CSSアニメーション時間と合わせる
+            }, hideTime);
+        }
+
+        // -----------------------------------------------------
+        // プレイヤーの操作ロジック
+        // -----------------------------------------------------
+
         // スコアポップアップ表示関数
         function showScorePop(element, points) {
             const pop = document.createElement('div');
@@ -418,8 +422,7 @@
             pop.textContent = sign + points;
             
             if (points > 0) {
-                pop.style.color = '#ffd700'; 
-                pop.style.fontSize = '3.0em'; 
+                pop.style.color = points >= GOLD_MOLE_SCORE ? '#ffd700' : '#27ae60'; 
             } else {
                 pop.style.color = '#e74c3c'; 
             }
@@ -436,28 +439,46 @@
             timeLeftDisplay.textContent = timeLeft;
             if (timeLeft <= 0 && isGameRunning) { endGame(); }
         }
-        
-        // 道端モグラたたきロジック
-        function whackRoadside(event) {
+
+        function whack(event) {
             if (!isGameRunning) return;
-            const mole = event.currentTarget;
+            const windowElement = event.currentTarget;
             
-            if (mole.classList.contains('roadside-mole')) {
-                const points = parseInt(mole.dataset.score);
+            if (windowElement.classList.contains('up')) {
+                const mole = windowElement.querySelector('.mole-in-car');
                 
-                showScorePop(mole, points); 
+                if (!mole) return; // モグラがいなければ何もしない
+
+                const points = parseInt(mole.dataset.score);
+                const type = mole.dataset.type;
+                const windowKey = windowElement.parentNode.dataset.type;
+
+                showScorePop(windowElement, points); 
 
                 score += points;
                 scoreDisplay.textContent = score;
 
-                mole.removeEventListener('click', whackRoadside);
+                // 時間の増減処理
+                if (type === 'clock') { 
+                    timeLeft += CLOCK_TIME_BONUS; 
+                } else if (type === 'bomb') { 
+                    timeLeft -= BOMB_TIME_PENALTY;
+                }
+                updateTime(); 
                 
-                // 叩かれたらすぐに削除
-                mole.remove(); 
-
-                // 次の道端モグラ出現をスケジュール 
-                clearTimeout(roadsideMoleTimerId);
-                roadsideMoleTimerId = setTimeout(peepRoadside, randomTime(300, 800)); 
+                // 叩かれたモグラはすぐに引っ込ませ、次の出現をスケジュール
+                windowElement.classList.remove('up');
+                windowElement.onclick = null; 
+                
+                clearTimeout(carTimers[windowKey]);
+                
+                // アニメーション後に要素を削除し、次の出現をスケジュール
+                setTimeout(() => {
+                    windowElement.innerHTML = '';
+                    if (isGameRunning) {
+                        carTimers[windowKey] = setTimeout(() => peepCarMole(windowElement), randomTime(500, 1500));
+                    }
+                }, 200); // CSSアニメーション時間と合わせる
             }
         }
 
@@ -475,15 +496,22 @@
             startButton.disabled = true;
             gameOverModal.style.display = 'none'; 
             
-            clearTimeout(roadsideMoleTimerId); 
+            // 既存のタイマーとモグラを全てクリア
+            Object.values(carTimers).forEach(clearTimeout);
             
-            // 既存の道端モグラを全て削除
-            document.querySelectorAll('.roadside-mole').forEach(mole => {
-                mole.remove();
+            document.querySelectorAll('.car-window').forEach(win => {
+                win.innerHTML = '';
+                win.classList.remove('up');
+                win.onclick = null;
             });
 
             countdownTimerId = setInterval(countdown, 1000);
-            peepRoadside(); 
+            
+            // 各車の窓にモグラの出現ループを開始
+            carContainers.forEach(container => {
+                const windowElement = container.querySelector('.car-window');
+                carTimers[container.dataset.type] = setTimeout(() => peepCarMole(windowElement), randomTime(500, 2000));
+            });
         }
 
         function countdown() {
@@ -494,15 +522,19 @@
         function endGame() {
             isGameRunning = false;
             clearInterval(countdownTimerId);
-            clearTimeout(roadsideMoleTimerId); 
             
-            // 画面上の道端モグラを全て削除
-            document.querySelectorAll('.roadside-mole').forEach(mole => {
-                mole.remove();
+            // 全てのモグラ出現タイマーを停止
+            Object.values(carTimers).forEach(clearTimeout);
+            
+            // 画面上のモグラを全て引っ込める
+            document.querySelectorAll('.car-window').forEach(win => {
+                win.classList.remove('up');
+                win.onclick = null;
+                // 0.2秒後にモグラ要素を削除
+                setTimeout(() => win.innerHTML = '', 200);
             });
 
             startButton.disabled = false;
-            
             finalScoreDisplay.textContent = score;
             gameOverModal.style.display = 'flex'; 
         }
