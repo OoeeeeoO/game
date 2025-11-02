@@ -626,6 +626,29 @@
             setTimeout(() => { pop.remove(); }, 700);
         }
 
+        function showTimePop(points, isBonus) {
+            const pop = document.createElement('div');
+            pop.classList.add('time-pop');
+            let sign = points > 0 ? '+' : '';
+            pop.textContent = sign + points + 's'; // 's' (秒) を追加
+
+            const timeContainer = document.getElementById('time-display-container');
+            timeContainer.appendChild(pop);
+
+            // ポイントに応じた色設定 (青:ボーナス / 赤:ペナルティ)
+            if (isBonus) {
+                // クロックモグラの色（青）を流用
+                pop.style.color = '#80c0ff';
+                pop.style.textShadow = '-2px -2px 0 #3d8fd8, 2px -2px 0 #3d8fd8, -2px 2px 0 #3d8fd8, 2px 2px 0 #3d8fd8, 3px 3px 0 rgba(0,0,0,0.4)';
+            } else {
+                // ボムモグラの色（赤）を流用
+                pop.style.color = '#ff4d4d';
+                pop.style.textShadow = '-2px -2px 0 #990000, 2px -2px 0 #990000, -2px 2px 0 #990000, 2px 2px 0 #990000, 3px 3px 0 rgba(0,0,0,0.4)';
+            }
+    
+            setTimeout(() => { pop.remove(); }, 700);
+        }
+
         function whack(event) {
             if (!isGameRunning) return;
             const hole = event.currentTarget;
