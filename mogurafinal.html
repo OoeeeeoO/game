@@ -406,8 +406,9 @@
         const CLOCK_TIME_BONUS = 5;
 
         const GOLD_MOLE_CHANCE = 0.10;
-        const BOMB_MOLE_CHANCE = 0.10;
+        const BOMB_MOLE_CHANCE = 0.10; // 🌟 15%から10%に修正
         const CLOCK_MOLE_CHANCE = 0.05;
+        // 通常モグラの確率は 1 - (0.10 + 0.10 + 0.05) = 0.75 となります
 
         const DIFFICULTY_SETTINGS = {
             easy: { minTime: 800, maxTime: 1800, holeCount: 9, gridColumns: 3, maxMoles: 1 }, 
@@ -595,8 +596,6 @@
             const pop = document.createElement('div');
             pop.classList.add('score-pop');
             let sign = points > 0 ? '+' : '';
-            
-            // 🌟 修正済み: スコアのみを表示し、時間増減情報は表示しない
             pop.textContent = sign + points;
             
             // ポイントに応じた色設定
@@ -607,7 +606,7 @@
                 pop.style.color = '#ff4d4d'; // 赤系
                 pop.style.textShadow = '-2px -2px 0 #990000, 2px -2px 0 #990000, -2px 2px 0 #990000, 2px 2px 0 #990000, 3px 3px 0 rgba(0,0,0,0.4)';
             } else if (type === 'clock') {
-                // 修正前: pop.textContent = sign + points + ' (+' + CLOCK_TIME_BONUS + 's)';
+                pop.textContent = sign + points + ' (+' + CLOCK_TIME_BONUS + 's)';
                 pop.style.color = '#80c0ff'; // 青系
                 pop.style.textShadow = '-2px -2px 0 #3d8fd8, 2px -2px 0 #3d8fd8, -2px 2px 0 #3d8fd8, 2px 2px 0 #3d8fd8, 3px 3px 0 rgba(0,0,0,0.4)';
             } else {
@@ -631,7 +630,6 @@
                 score += points;
                 scoreDisplay.textContent = score;
 
-                // 🌟 時間増減ロジックは維持
                 if (type === 'clock') { timeLeft += CLOCK_TIME_BONUS; }
                 else if (type === 'bomb') { timeLeft -= BOMB_TIME_PENALTY; }
 
