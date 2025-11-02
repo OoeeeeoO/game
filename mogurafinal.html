@@ -326,7 +326,7 @@
 
         .time-pop {
                 position: absolute; top: 0; right: 10px; /* タイム表示コンテナの右上に配置 */
-                transform: translate(-50%, -50%); font-size: 2.5em; /* スコアポップより少し小さく */
+                /*transform: translate(-50%, -50%); font-size: 2.5em; /* スコアポップより少し小さく */*/
                 font-weight: bold;
                 pointer-events: none; opacity: 0;
                 animation: timePopUp 0.7s ease-out forwards; /* 専用アニメーション */
@@ -335,8 +335,8 @@
 
         @keyframes timePopUp {
             0% { opacity: 1; transform: translate(0, 0) scale(0.8); }
-            50% { transform: translate(5px, -15px) scale(1.1); } /* 右上に移動 */
-            100% { opacity: 0; transform: translate(10px, -30px) scale(1); }
+            50% { transform: translate(0px, -30px) scale(1.1); } /* 右上に移動 */
+            100% { opacity: 0; transform: translate(0px, -60px) scale(1); }
         }
 
         /* カウントダウンオーバーレイのCSS (維持) */
@@ -646,6 +646,7 @@
             pop.textContent = sign + points + 's'; // 's' (秒) を追加
 
             const timeContainer = document.getElementById('time-display-container');
+            pop.style.top = '60%';
             timeContainer.appendChild(pop);
 
             // ポイントに応じた色設定 (青:ボーナス / 赤:ペナルティ)
